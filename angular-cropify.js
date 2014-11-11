@@ -1,8 +1,8 @@
 (function() {
     'use strict';
 
-    angular.module('hj.cropify', []).directive('hjCropify', ['$rootScope', '$document', '$timeout',
-        function($rootScope, $document, $timeout) {
+    angular.module('hj.cropify', []).directive('hjCropify', ['$rootScope', '$window', '$document', '$timeout',
+        function($rootScope, $window, $document, $timeout) {
             return {
                 restrict: 'EA',
                 transclude: true,
@@ -23,11 +23,12 @@
 
                     html += '<div class="hj-cropify-container" style="display: ' + options.display + '; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;" ng-transclude></div>';
 
-                    html += '<div ng-show="ctrl.show.selection">' +
-                        '<div ng-style="ctrl.getStyleLeft()"></div>' +
-                        '<div ng-style="ctrl.getStyleRight()"></div>' +
-                        '<div ng-style="ctrl.getStyleTop()"></div>' +
-                        '<div ng-style="ctrl.getStyleBottom()"></div>' +
+                    html += '<div class="hj-cropify-selection" ng-show="ctrl.show.selection">' +
+                        '<div class="hj-cropify-crop" ng-style="ctrl.getStyleCrop()"></div>' +
+                        '<div class="hj-cropify-shade" ng-style="ctrl.getStyleLeft()"></div>' +
+                        '<div class="hj-cropify-shade" ng-style="ctrl.getStyleRight()"></div>' +
+                        '<div class="hj-cropify-shade" ng-style="ctrl.getStyleTop()"></div>' +
+                        '<div class="hj-cropify-shade" ng-style="ctrl.getStyleBottom()"></div>' +
                         '</div>';
 
                     html += "</div>";
@@ -39,7 +40,18 @@
                         var options = {
                             id: "hjCropify" + (+new Date()),
                             aspectRatio: 0,
-                            selectBuffer: 50
+                            selectBuffer: 50,
+                            selectionStyle: {
+                                'position': 'absolute',
+                                'background-color': 'black',
+                                'opacity': 0.5,
+                                'z-index': 999,
+                                'pointer-events': 'none',
+                                '-webkit-user-select': 'none',
+                                '-moz-user-select': 'none',
+                                '-ms-user-select': 'none',
+                                'user-select': 'none'
+                            }
                         };
 
                         if ($attrs.hjCropifyOptions !== undefined) {
@@ -52,18 +64,7 @@
                 controllerAs: 'ctrl',
                 controller: function($scope, $element, $attrs) {
                     var ctrl = this,
-                        options;
-
-                    var selectionStyle = {
-                        'position': 'absolute',
-                        'background-color': 'black',
-                        'opacity': 0.5,
-                        'z-index': 999,
-                        '-webkit-user-select': 'none',
-                        '-moz-user-select': 'none',
-                        '-ms-user-select': 'none',
-                        'user-select': 'none'
-                    };
+                        options = {};
 
                     ctrl.getStyleLeft = function() {
                         return angular.extend({
@@ -71,7 +72,7 @@
                             left: ctrl.coordsTemp.el.left - ctrl.offsets.el.left + 'px',
                             height: ctrl.coordsTemp.el.bottom - ctrl.coordsTemp.el.top + 'px',
                             width: ctrl.coordsTemp.select.left - ctrl.coordsTemp.el.left + 'px'
-                        }, selectionStyle);
+                        }, options.selectionStyle);
                     };
 
                     ctrl.getStyleRight = function() {
@@ -80,7 +81,7 @@
                             left: ctrl.coordsTemp.select.right - ctrl.offsets.el.left + 'px',
                             height: ctrl.coordsTemp.el.bottom - ctrl.coordsTemp.el.top + 'px',
                             width: ctrl.coordsTemp.el.right - ctrl.coordsTemp.select.right + 'px'
-                        }, selectionStyle);
+                        }, options.selectionStyle);
                     };
 
                     ctrl.getStyleTop = function() {
@@ -89,7 +90,7 @@
                             left: ctrl.coordsTemp.select.left - ctrl.offsets.el.left + 'px',
                             height: ctrl.coordsTemp.select.top - ctrl.coordsTemp.el.top + 'px',
                             width: ctrl.coordsTemp.select.right - ctrl.coordsTemp.select.left + 'px',
-                        }, selectionStyle);
+                        }, options.selectionStyle);
                     };
 
                     ctrl.getStyleBottom = function() {
@@ -98,43 +99,62 @@
                             left: ctrl.coordsTemp.select.left - ctrl.offsets.el.left + 'px',
                             height: ctrl.coordsTemp.el.bottom - ctrl.coordsTemp.select.bottom + 'px',
                             width: ctrl.coordsTemp.select.right - ctrl.coordsTemp.select.left + 'px'
-                        }, selectionStyle);
+                        }, options.selectionStyle);
                     };
 
-                    var container = angular.element($element[0].querySelector('.hj-cropify-container'));
+                    ctrl.getStyleCrop = function() {
+                        return {
+                            'position': 'absolute',
+                            'z-index': 999,
+                            'cursor': 'move',
+                            // 'background-color': 'rgba(128,0,0,0.5)',
+                            'border': '1px dashed rgba(255,255,255,0.5)',
+                            top: ctrl.coords.el.height * ctrl.coords.select.top + 'px',
+                            left: ctrl.coords.el.width * ctrl.coords.select.left + 'px',
+                            width: ctrl.coords.el.width * ctrl.coords.select.width + 'px',
+                            height: ctrl.coords.el.height * ctrl.coords.select.height + 'px'
+                        };
+                    };
+
+                    var container = angular.element($element[0].querySelector('.hj-cropify-container')),
+                        crop = angular.element($element[0].querySelector('.hj-cropify-crop'));
 
                     /**
-            @property ctrl.offsets Holds the relative offset of this directive / the element (for position absolute to work with the coordinates properly)
-            @type Object
-            */
+                    @property ctrl.offsets Holds the relative offset of this directive / the element (for position absolute to work with the coordinates properly)
+                    @type Object
+                    */
                     ctrl.offsets = {
                         el: {
+                            top: 0,
+                            left: 0
+                        },
+                        crop: {
                             top: 0,
                             left: 0
                         }
                     };
 
                     /**
-            @property ctrl.show For use with ng-show/ng-hide
-            @type Object
-            */
+                    @property ctrl.show For use with ng-show/ng-hide
+                    @type Object
+                    */
                     ctrl.show = {
                         selection: true
                     };
 
                     /**
-            @property ctrl.state Triggers for tracking when mouse/touch is started and ended
-            @type Object
-            */
+                    @property ctrl.state Triggers for tracking when mouse/touch is started and ended
+                    @type Object
+                    */
                     ctrl.state = {
-                        started: false,
-                        ended: false
+                        cropping: false,
+                        dragging: false
                     };
 
                     /**
-            @property ctrl.coordsTemp Internal coordinates used for the calculations
-            @type Object
-            */
+                    @property ctrl.coordsTemp Internal coordinates used for the calculations
+                    @type Object
+                    */
                     ctrl.coordsTemp = {
                         start: {
                             x: 0,
@@ -161,9 +181,9 @@
                     };
 
                     /**
-            @property ctrl.coords The passed in (and set) coordinates to use outside this directive. They are all 0 offset so you'll get the dimensions of the element itself and then the dimensions of the selected area inside of that.
-            @type Object
-            */
+                    @property ctrl.coords The passed in (and set) coordinates to use outside this directive. They are all 0 offset so you'll get the dimensions of the element itself and then the dimensions of the selected area inside of that.
+                    @type Object
+                    */
                     ctrl.coords = {
                         el: {
                             left: 0,
@@ -183,48 +203,95 @@
                         }
                     };
 
-                    $document.on('mousedown', function(e) {
-                        start(e);
-                        scopeApply();
-                    });
-                    $document.on('touchstart', function(e) {
-                        start(e);
+                    crop.on('mousedown touchstart', function(e) {
+                        e.stopPropagation();
+
+                        dragStart(e);
+
                         scopeApply();
                     });
 
-                    // container.on('mouseup', function(e) {
-                    $document.on('mouseup', function(e) {
+                    crop.on('mousemove touchmove', function(e) {
+                        e.stopPropagation();
+
+                        dragMove(e);
+
+                        scopeApply();
+                    });
+
+                    container.on('mousedown touchstart', function(e) {
+                        cropStart(e);
+
+                        scopeApply();
+                    });
+
+                    container.on('mousemove touchmove', function(e) {
+                        cropMove(e);
+
+                        scopeApply();
+                    });
+
+                    $document.on('mouseup touchend', function(e) {
                         end(e);
-                        scopeApply();
-                    });
-                    // container.on('touchend', function(e) {
-                    $document.on('touchend', function(e) {
-                        end(e, {});
+
                         scopeApply();
                     });
 
-                    $document.on('mousemove', function(e) {
-                        move(e);
-                        scopeApply();
-                    });
-                    $document.on('touchmove', function(e) {
-                        move(e);
+                    var resizeEvent = 'onorientationchange' in $window ? 'orientationchange' : 'resize';
+
+                    angular.element($window).on(resizeEvent, function() {
+                        getCoords();
+
+                        setTempSelect();
+
                         scopeApply();
                     });
 
-                    var init = function() {
-                        getElCoords();
+                    $scope.$watch('coords', function(n) {
+                        getCoords();
 
-                        ctrl.show.selection = true;
+                        ctrl.coords.select = n;
+
+                        setTempSelect();
+                    });
+
+                    var setTempSelect = function() {
+                        ctrl.coordsTemp.select = {
+                            top: (ctrl.coords.select.top * ctrl.coords.el.height) + ctrl.offsets.el.top,
+                            bottom: (ctrl.coords.select.bottom * ctrl.coords.el.height) + ctrl.offsets.el.top,
+                            left: (ctrl.coords.select.left * ctrl.coords.el.width) + ctrl.offsets.el.left,
+                            right: (ctrl.coords.select.right * ctrl.coords.el.width) + ctrl.offsets.el.left
+                        };
+
+                        ctrl.coordsTemp.select.width = ctrl.coordsTemp.select.right - ctrl.coordsTemp.select.left;
+                        ctrl.coordsTemp.select.height = ctrl.coordsTemp.select.bottom - ctrl.coordsTemp.select.top;
+
+                        calculateSelectArea();
                     };
 
-                    var start = function(e) {
+                    var init = function() {
+                        getCoords($scope.coords || {});
+
+                        calculateSelectArea(true);
+                    };
+
+                    var end = function(e) {
+                        cropMove(e);
+
+                        if (ctrl.state.cropping || ctrl.state.dragging) {
+                            calculateSelectArea(true);
+                        }
+
+                        ctrl.state.cropping = false;
+                        ctrl.state.dragging = false;
+                    };
+
+                    var cropStart = function(e) {
                         var xx = e.pageX;
                         var yy = e.pageY;
 
-                        // if(xx >= ctrl.coordsTemp.el.left && xx <= ctrl.coordsTemp.el.right && yy >= ctrl.coordsTemp.el.top && yy <= ctrl.coordsTemp.el.bottom) {
-
-                        if (xx >= ctrl.coordsTemp.el.left - options.selectBuffer && xx <= ctrl.coordsTemp.el.right + options.selectBuffer && yy >= ctrl.coordsTemp.el.top - options.selectBuffer && yy <= ctrl.coordsTemp.el.bottom + options.selectBuffer) { //only start if within a certain distance of the element itself (i.e. don't reset if doing something else but DO want a little buffer to allow for selecting from an edge and getting it all)
+                        //only start if within a certain distance of the element itself (i.e. don't reset if doing something else but DO want a little buffer to allow for selecting from an edge and getting it all)
+                        if (xx >= ctrl.coordsTemp.el.left - options.selectBuffer && xx <= ctrl.coordsTemp.el.right + options.selectBuffer && yy >= ctrl.coordsTemp.el.top - options.selectBuffer && yy <= ctrl.coordsTemp.el.bottom + options.selectBuffer) {
 
                             if (xx < ctrl.coordsTemp.el.left) {
                                 xx = ctrl.coordsTemp.el.left;
@@ -239,102 +306,129 @@
 
                             ctrl.coordsTemp.start.x = xx;
                             ctrl.coordsTemp.start.y = yy;
-                            ctrl.state.started = true;
-                        }
 
-                        ctrl.state.ended = false;
+                            ctrl.state.cropping = true;
+                        }
                     };
 
-                    var end = function(e) {
-                        move(e);
-
-                        if (ctrl.state.started) {
-                            calculateSelectArea();
-
-                            ctrl.state.ended = true;
+                    var cropMove = function(e) {
+                        if (!ctrl.state.cropping) {
+                            return;
                         }
 
-                        ctrl.state.started = false;
+                        var xx = e.pageX;
+                        var yy = e.pageY;
+
+                        //don't allow to be outside the element itself
+                        if (xx > ctrl.coordsTemp.el.right) {
+                            xx = ctrl.coordsTemp.el.right;
+                        } else if (xx < ctrl.coordsTemp.el.left) {
+                            xx = ctrl.coordsTemp.el.left;
+                        }
+                        if (yy > ctrl.coordsTemp.el.bottom) {
+                            yy = ctrl.coordsTemp.el.bottom;
+                        } else if (yy < ctrl.coordsTemp.el.top) {
+                            yy = ctrl.coordsTemp.el.top;
+                        }
+
+                        ctrl.coordsTemp.end.x = xx;
+                        ctrl.coordsTemp.end.y = yy;
+
+                        var selectTemp = {};
+
+                        //calculate the select area top, left, right, bottom (if end is less than start, reverse them)
+                        //end more left than start
+                        if (ctrl.coordsTemp.end.x < ctrl.coordsTemp.start.x) {
+                            selectTemp.left = ctrl.coordsTemp.end.x;
+                            selectTemp.right = ctrl.coordsTemp.start.x;
+                        } else { //start same or more left than end
+                            selectTemp.left = ctrl.coordsTemp.start.x;
+                            selectTemp.right = ctrl.coordsTemp.end.x;
+                        }
+                        //end higher than start
+                        if (ctrl.coordsTemp.end.y < ctrl.coordsTemp.start.y) {
+                            selectTemp.top = ctrl.coordsTemp.end.y;
+                            selectTemp.bottom = ctrl.coordsTemp.start.y;
+                        } else { //start same or higher than end
+                            selectTemp.top = ctrl.coordsTemp.start.y;
+                            selectTemp.bottom = ctrl.coordsTemp.end.y;
+                        }
+
+                        //if aspect ratio set, enforce proportions by making the part that is too large be smaller (i.e. always SHRINK, rather than grow). Shrink because this ensures don't run into issues where to make it fit the ratio, would have to go outside the element and thus would have to do handle these more complicated edge cases.
+                        if (options.aspectRatio > 0) {
+                            var curWidth = selectTemp.right - selectTemp.left;
+                            var curHeight = selectTemp.bottom - selectTemp.top;
+                            var curRatio = curWidth / curHeight;
+
+                            //too wide, shrink width
+                            if (curRatio > options.aspectRatio) {
+                                //end more left than start
+                                if (ctrl.coordsTemp.end.x < ctrl.coordsTemp.start.x) {
+                                    //were ending on the left, so alter the left
+                                    selectTemp.left = selectTemp.right - (curHeight * options.aspectRatio);
+                                } else { //start same or more left than end
+                                    //were ending on right, alter the right
+                                    selectTemp.right = selectTemp.left + (curHeight * options.aspectRatio);
+                                }
+                            }
+                            //too tall, shrink height
+                            else {
+                                //end higher than start
+                                if (ctrl.coordsTemp.end.y < ctrl.coordsTemp.start.y) {
+                                    //were ending on the top, so alter top
+                                    selectTemp.top = selectTemp.bottom - (curWidth / options.aspectRatio);
+                                } else { //start same or higher than end
+                                    //were ending on the bottom, so alter bottom
+                                    selectTemp.bottom = selectTemp.top + (curWidth / options.aspectRatio);
+                                }
+                            }
+                        }
+
+                        ctrl.coordsTemp.select = {
+                            top: selectTemp.top,
+                            left: selectTemp.left,
+                            bottom: selectTemp.bottom,
+                            right: selectTemp.right
+                        };
+
+                        ctrl.coordsTemp.select.width = selectTemp.right - selectTemp.left;
+                        ctrl.coordsTemp.select.height = selectTemp.bottom - selectTemp.top;
+
+                        calculateSelectArea();
                     };
 
-                    var move = function(e) {
-                        if (ctrl.state.started) {
-                            var xx = e.pageX;
-                            var yy = e.pageY;
+                    var dragStart = function(e) {
+                        ctrl.state.dragging = true;
 
-                            //don't allow to be outside the element itself
-                            if (xx > ctrl.coordsTemp.el.right) {
-                                xx = ctrl.coordsTemp.el.right;
-                            } else if (xx < ctrl.coordsTemp.el.left) {
-                                xx = ctrl.coordsTemp.el.left;
-                            }
-                            if (yy > ctrl.coordsTemp.el.bottom) {
-                                yy = ctrl.coordsTemp.el.bottom;
-                            } else if (yy < ctrl.coordsTemp.el.top) {
-                                yy = ctrl.coordsTemp.el.top;
-                            }
+                        ctrl.offsets.crop.left = e.offsetX;
+                        ctrl.offsets.crop.top = e.offsetY;
+                    };
 
-                            ctrl.coordsTemp.end.x = xx;
-                            ctrl.coordsTemp.end.y = yy;
-
-                            var selectTemp = {};
-
-                            //calculate the select area top, left, right, bottom (if end is less than start, reverse them)
-                            //end more left than start
-                            if (ctrl.coordsTemp.end.x < ctrl.coordsTemp.start.x) {
-                                selectTemp.left = ctrl.coordsTemp.end.x;
-                                selectTemp.right = ctrl.coordsTemp.start.x;
-                            } else { //start same or more left than end
-                                selectTemp.left = ctrl.coordsTemp.start.x;
-                                selectTemp.right = ctrl.coordsTemp.end.x;
-                            }
-                            //end higher than start
-                            if (ctrl.coordsTemp.end.y < ctrl.coordsTemp.start.y) {
-                                selectTemp.top = ctrl.coordsTemp.end.y;
-                                selectTemp.bottom = ctrl.coordsTemp.start.y;
-                            } else { //start same or higher than end
-                                selectTemp.top = ctrl.coordsTemp.start.y;
-                                selectTemp.bottom = ctrl.coordsTemp.end.y;
-                            }
-
-                            //if aspect ratio set, enforce proportions by making the part that is too large be smaller (i.e. always SHRINK, rather than grow). Shrink because this ensures don't run into issues where to make it fit the ratio, would have to go outside the element and thus would have to do handle these more complicated edge cases.
-                            if (options.aspectRatio > 0) {
-                                var curWidth = selectTemp.right - selectTemp.left;
-                                var curHeight = selectTemp.bottom - selectTemp.top;
-                                var curRatio = curWidth / curHeight;
-
-                                //too wide, shrink width
-                                if (curRatio > options.aspectRatio) {
-                                    //end more left than start
-                                    if (ctrl.coordsTemp.end.x < ctrl.coordsTemp.start.x) {
-                                        //were ending on the left, so alter the left
-                                        selectTemp.left = selectTemp.right - (curHeight * options.aspectRatio);
-                                    } else { //start same or more left than end
-                                        //were ending on right, alter the right
-                                        selectTemp.right = selectTemp.left + (curHeight * options.aspectRatio);
-                                    }
-                                }
-
-                                //too tall, shrink height
-                                else {
-                                    //end higher than start
-                                    if (ctrl.coordsTemp.end.y < ctrl.coordsTemp.start.y) {
-                                        //were ending on the top, so alter top
-                                        selectTemp.top = selectTemp.bottom - (curWidth / options.aspectRatio);
-                                    } else { //start same or higher than end
-                                        //were ending on the bottom, so alter bottom
-                                        selectTemp.bottom = selectTemp.top + (curWidth / options.aspectRatio);
-                                    }
-                                }
-                            }
-
-                            ctrl.coordsTemp.select.top = selectTemp.top;
-                            ctrl.coordsTemp.select.left = selectTemp.left;
-                            ctrl.coordsTemp.select.bottom = selectTemp.bottom;
-                            ctrl.coordsTemp.select.right = selectTemp.right;
-
-                            calculateSelectArea();
+                    var dragMove = function(e) {
+                        if (!ctrl.state.dragging) {
+                            return;
                         }
+
+                        var maxX = (ctrl.offsets.el.left + ctrl.coords.el.width) - ctrl.coordsTemp.select.width,
+                            minX = ctrl.offsets.el.left;
+
+                        var maxY = (ctrl.offsets.el.top + ctrl.coords.el.height) - ctrl.coordsTemp.select.height,
+                            minY = ctrl.offsets.el.top;
+
+                        var xx = e.pageX - ctrl.offsets.crop.left;
+                        var yy = e.pageY - ctrl.offsets.crop.top;
+
+                        xx = Math.min(xx, maxX);
+                        xx = Math.max(xx, minX);
+                        yy = Math.min(yy, maxY);
+                        yy = Math.max(yy, minY);
+
+                        ctrl.coordsTemp.select.top = yy;
+                        ctrl.coordsTemp.select.left = xx;
+                        ctrl.coordsTemp.select.bottom = yy + ctrl.coordsTemp.select.height;
+                        ctrl.coordsTemp.select.right = xx + ctrl.coordsTemp.select.width;
+
+                        calculateSelectArea();
                     };
 
                     var scopeApply = function() {
@@ -343,14 +437,16 @@
                         }
                     };
 
-                    var calculateSelectArea = function() {
+                    var calculateSelectArea = function(update) {
+                        update = update || false;
+
                         ctrl.coords.select = {
-                            left: ctrl.coordsTemp.select.left - ctrl.offsets.el.left,
-                            top: ctrl.coordsTemp.select.top - ctrl.offsets.el.top,
-                            right: ctrl.coordsTemp.select.right - ctrl.offsets.el.left,
-                            bottom: ctrl.coordsTemp.select.bottom - ctrl.offsets.el.top,
-                            height: ctrl.coordsTemp.select.bottom - ctrl.coordsTemp.select.top,
-                            width: ctrl.coordsTemp.select.right - ctrl.coordsTemp.select.left
+                            left: (ctrl.coordsTemp.select.left - ctrl.offsets.el.left) / ctrl.coords.el.width,
+                            top: (ctrl.coordsTemp.select.top - ctrl.offsets.el.top) / ctrl.coords.el.height,
+                            right: (ctrl.coordsTemp.select.right - ctrl.offsets.el.left) / ctrl.coords.el.width,
+                            bottom: (ctrl.coordsTemp.select.bottom - ctrl.offsets.el.top) / ctrl.coords.el.height,
+                            height: (ctrl.coordsTemp.select.bottom - ctrl.coordsTemp.select.top) / ctrl.coords.el.height,
+                            width: (ctrl.coordsTemp.select.right - ctrl.coordsTemp.select.left) / ctrl.coords.el.width
                         };
 
                         if (ctrl.coords.select.width === 0 && ctrl.coords.select.height === 0) {
@@ -359,11 +455,15 @@
                             ctrl.show.selection = true;
                         }
 
-                        $scope.coords = ctrl.coords.select;
+                        if (update) {
+                            $scope.coords = ctrl.coords.select;
+                        }
                     };
 
-                    var getElCoords = function() {
-                        var rect1 = container[0].getBoundingClientRect(); //gives correct height & width sometimes negative/wrong left/top/right/bottom!
+                    var getCoords = function(coords) {
+                        coords = coords || {};
+
+                        var tempRect = container[0].getBoundingClientRect(); //gives correct height & width sometimes negative/wrong left/top/right/bottom!
                         var el = container[0];
                         var _x = 0;
                         var _y = 0;
@@ -379,9 +479,9 @@
 
                         var rect = {
                             left: _x,
-                            right: _x + rect1.width,
+                            right: _x + tempRect.width,
                             top: _y,
-                            bottom: _y + rect1.height
+                            bottom: _y + tempRect.height
                         };
 
                         ctrl.coordsTemp.el = {
@@ -396,14 +496,6 @@
                             left: rect.left
                         };
 
-                        //set select coords to have it all selected at first
-                        ctrl.coordsTemp.select = {
-                            left: rect.left,
-                            right: rect.right,
-                            top: rect.top,
-                            bottom: rect.bottom
-                        };
-
                         ctrl.coords.el = {
                             left: 0,
                             top: 0,
@@ -412,25 +504,64 @@
                             height: rect.bottom - rect.top,
                             width: rect.right - rect.left
                         };
+
+                        if (Object.keys(coords).length === 0) {
+                            ctrl.coordsTemp.select = {
+                                left: rect.left,
+                                right: rect.left,
+                                top: rect.top,
+                                bottom: rect.top,
+                                width: 0,
+                                height: 0
+                            };
+
+                        } else {
+                            ctrl.coordsTemp.select = {
+                                left: (ctrl.coords.el.width * coords.left) + ctrl.offsets.el.left,
+                                right: (ctrl.coords.el.width * coords.right) + ctrl.offsets.el.left,
+                                top: (ctrl.coords.el.height * coords.top) + ctrl.offsets.el.top,
+                                bottom: (ctrl.coords.el.height * coords.bottom) + ctrl.offsets.el.top,
+                                width: ctrl.coords.el.width * coords.width,
+                                height: ctrl.coords.el.height * coords.height
+                            };
+                        }
                     };
 
-                    $scope.$on('hjCropify:forceInit', function(e, params) {
-                        if (params.id == options.id) {
-                            init({});
+                    $scope.$on('hjCropify:init', function(e, params) {
+                        if (params) {
+                            if (params.id && params.id !== options.id) {
+                                return false;
+                            }
                         }
+
+                        init();
+                    });
+
+                    $scope.$on('hjCropify:reset', function(e, params) {
+                        if (params) {
+                            if (params.id && params.id !== options.id) {
+                                return false;
+                            }
+                        }
+
+                        $scope.coords = {};
                     });
 
                     $scope.$on('hjCropify:hide', function(e, params) {
-                        if (params.id == options.id) {
-                            ctrl.show.selection = false;
+                        if (params) {
+                            if (params.id && params.id !== options.id) {
+                                return false;
+                            }
                         }
+
+                        ctrl.show.selection = false;
                     });
 
                     $timeout(function() {
                         options = $scope.options;
 
                         init();
-                    });
+                    }, 100);
                 }
             };
         }

@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+}
+
 body {
 	font-family: Helvetica, sans-serif;
 	position: absolute;
@@ -7,17 +11,34 @@ body {
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	user-select: none;
+	padding: 10%;
 }
 
-.hj-cropify {
-	position: absolute !important; 
-	top: 10%;
-	bottom: 10%;
-	left: 10%;
-	right: 10%;
+.padding {
+	position: relative;
+	width: 100%;
+	padding-top: 66%;
+	z-index: 0;
 }
 
 .hj-cropify img {
-	max-width: 100%;
-	max-height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 1;
+}
+
+ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+li {
+	display: inline-block;
+	margin: 20px 20px 0 0;
+	cursor: pointer;
 }
