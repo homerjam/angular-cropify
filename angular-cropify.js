@@ -12,8 +12,8 @@
                     options: '&'
                 },
                 template: function() {
-                    var html = '<div class="hj-cropify" style="position: relative">' +
-                        '<div class="hj-cropify-container" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;" ng-transclude></div>' +
+                    var html = '<div class="hj-cropify" style="position: relative; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">' +
+                        '<div class="hj-cropify-container" style="display: inline-block;" ng-transclude></div>' +
                         '<div class="hj-cropify-selection" ng-show="ctrl.show.selection">' +
                         '<div class="hj-cropify-crop" ng-style="ctrl.getStyleCrop()"></div>' +
                         '<div class="hj-cropify-shade" ng-style="ctrl.getStyleLeft()"></div>' +
