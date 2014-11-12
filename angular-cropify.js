@@ -453,18 +453,14 @@
                     var setCoords = function(coords) {
                         coords = coords || {};
 
-                        var _rect = container[0].getBoundingClientRect(); //gives correct height & width sometimes negative/wrong left/top/right/bottom!
-                        var el = container[0];
-                        var _x = 0;
-                        var _y = 0;
+                        var _rect = container[0].getBoundingClientRect(), //gives correct height & width sometimes negative/wrong left/top/right/bottom!
+                            el = $element[0].parentElement,
+                            _x = 0, _y = 0;
 
-                        while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
-                            // _x += el.offsetLeft - el.scrollLeft;
-                            // _y += el.offsetTop - el.scrollTop;
-                            //do NOT subtract scroll? creates issues on webkit/chrome if scrolled down
-                            _x += el.offsetLeft;
-                            _y += el.offsetTop;
-                            el = el.offsetParent;
+                        while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop) && !isNaN(el.scrollLeft) && !isNaN(el.scrollTop)) {
+                            _x += el.offsetLeft + el.scrollLeft;
+                            _y += el.offsetTop + el.scrollTop;
+                            el = el.parentElement;
                         }
 
                         var rect = {
