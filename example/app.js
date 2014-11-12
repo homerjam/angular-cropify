@@ -4,12 +4,12 @@ var ExampleCtrl = function($scope) {
     var ctrl = this;
 
     ctrl.coords = {
-        bottom: 0.8345710998694076,
-        height: 0.4368438271421349,
-        left: 0.29,
-        right: 0.8666331658291457,
-        top: 0.3977272727272727,
-        width: 0.5766331658291457
+        "left": 0.29,
+        "top": 0.398,
+        "right": 0.867,
+        "bottom": 0.835,
+        "height": 0.437,
+        "width": 0.577
     };
 
     $scope.$watch(function() {
@@ -18,18 +18,14 @@ var ExampleCtrl = function($scope) {
         console.log(n);
     });
 
-    ctrl.reset = function() {
-        $scope.$broadcast('hjCropify:reset');
-    };
-
     ctrl.setCrop = function() {
         ctrl.coords = {
-            bottom: 0.8345710998694076,
-            height: 0.4368438271421349,
-            left: 0.29,
-            right: 0.8666331658291457,
-            top: 0.3977272727272727,
-            width: 0.5766331658291457
+            "left": 0.29,
+            "top": 0.398,
+            "right": 0.867,
+            "bottom": 0.835,
+            "height": 0.437,
+            "width": 0.577
         };
     };
 };

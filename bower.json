@@ -1,9 +1,8 @@
 {
     "name": "angular-cropify",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "main": "angular-cropify.js",
     "dependencies": {
-        "angular": "~1.2.26",
-        "angular-touch": "~1.2.26"
+        "angular": "~1.2.26"
     }
 }

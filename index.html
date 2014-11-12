@@ -12,19 +12,20 @@
 
     <div hj-cropify hj-cropify-options="{aspectRatio: 2}" coords="ctrl.coords">
 
-	    <div class="padding"></div>
+        <div class="padding"></div>
 
         <img ng-src="example/test.jpg">
 
     </div>
 
     <ul class="controls">
-	    <li ng-click="ctrl.reset()">Reset</li>
-	    <li ng-click="ctrl.setCrop()">Set Crop</li>
+        <li ng-click="ctrl.coords = {}">Reset</li>
+        <li ng-click="ctrl.setCrop()">Set Crop</li>
     </ul>
 
+    <pre>{{ctrl.coords}}</pre>
+
     <script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
-    <script type="text/javascript" src="bower_components/angular-touch/angular-touch.min.js"></script>
     <script type="text/javascript" src="angular-cropify.js"></script>
     <script type="text/javascript" src="example/app.js"></script>
 
