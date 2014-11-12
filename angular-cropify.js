@@ -563,7 +563,7 @@
                         options = $scope.options;
 
                         init();
-                    }, 100);
+                    });
                 }
             };
         }
