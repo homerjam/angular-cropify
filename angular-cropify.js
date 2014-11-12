@@ -1,16 +1,17 @@
 (function() {
     'use strict';
 
-    angular.module('hj.cropify', []).directive('hjCropify', ['$rootScope', '$window', '$document', '$timeout',
-        function($rootScope, $window, $document, $timeout) {
+    angular.module('hj.cropify', []).directive('hjCropify', ['$window', '$document', '$timeout',
+        function($window, $document, $timeout) {
             return {
                 restrict: 'EA',
                 transclude: true,
                 scope: {
                     coords: '=',
+                    aspectRatio: '=',
                     options: '&'
                 },
-                template: function($element, $attrs) {
+                template: function() {
                     var html = '<div class="hj-cropify" style="position: relative">' +
                         '<div class="hj-cropify-container" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;" ng-transclude></div>' +
                         '<div class="hj-cropify-selection" ng-show="ctrl.show.selection">' +
@@ -24,37 +25,26 @@
 
                     return html;
                 },
-                link: {
-                    pre: function($scope, $element, $attrs) {
-                        var options = {
-                            id: "hjCropify" + (+new Date()),
-                            aspectRatio: 0,
-                            precision: 3,
-                            selectBuffer: 10,
-                            selectionStyle: {
-                                'position': 'absolute',
-                                'background-color': 'black',
-                                'opacity': 0.5,
-                                'z-index': 999,
-                                'pointer-events': 'none',
-                                '-webkit-user-select': 'none',
-                                '-moz-user-select': 'none',
-                                '-ms-user-select': 'none',
-                                'user-select': 'none'
-                            }
-                        };
-
-                        if ($attrs.hjCropifyOptions !== undefined) {
-                            angular.extend(options, $rootScope.$eval($attrs.hjCropifyOptions));
-                        }
-
-                        $scope.options = options;
-                    }
-                },
                 controllerAs: 'ctrl',
-                controller: function($scope, $element, $attrs) {
-                    var ctrl = this,
-                        options = {};
+                controller: ['$scope', '$element', '$attrs', function($scope, $element, $attrs) {
+                    var ctrl = this;
+
+                    var options = {
+                        id: "hjCropify" + (+new Date()),
+                        precision: 3,
+                        selectBuffer: 10,
+                        selectionStyle: {
+                            'position': 'absolute',
+                            'background-color': 'black',
+                            'opacity': 0.5,
+                            'z-index': 999,
+                            'pointer-events': 'none',
+                            '-webkit-user-select': 'none',
+                            '-moz-user-select': 'none',
+                            '-ms-user-select': 'none',
+                            'user-select': 'none'
+                        }
+                    };
 
                     ctrl.getStyleLeft = function() {
                         return angular.extend({
@@ -240,6 +230,10 @@
                     });
 
                     $scope.$watch('coords', function(n) {
+                        if (n === undefined) {
+                            return;
+                        }
+
                         setCoords();
 
                         ctrl.coords.select = n;
@@ -262,6 +256,10 @@
                     };
 
                     var init = function() {
+                        if ($attrs.hjCropifyOptions !== undefined) {
+                            angular.extend(options, $scope.$eval($attrs.hjCropifyOptions));
+                        }
+
                         setCoords($scope.coords || {});
 
                         calculateSelectArea(true);
@@ -347,20 +345,20 @@
                         }
 
                         //if aspect ratio set, enforce proportions by making the part that is too large be smaller
-                        if (options.aspectRatio > 0) {
+                        if ($scope.aspectRatio > 0) {
                             var curWidth = selectTemp.right - selectTemp.left;
                             var curHeight = selectTemp.bottom - selectTemp.top;
                             var curRatio = curWidth / curHeight;
 
                             //too wide, shrink width
-                            if (curRatio > options.aspectRatio) {
+                            if (curRatio > $scope.aspectRatio) {
                                 //end more left than start
                                 if (_coords.end.x < _coords.start.x) {
                                     //we're ending on the left, so alter the left
-                                    selectTemp.left = selectTemp.right - (curHeight * options.aspectRatio);
+                                    selectTemp.left = selectTemp.right - (curHeight * $scope.aspectRatio);
                                 } else { //start same or more left than end
                                     //we're ending on right, alter the right
-                                    selectTemp.right = selectTemp.left + (curHeight * options.aspectRatio);
+                                    selectTemp.right = selectTemp.left + (curHeight * $scope.aspectRatio);
                                 }
                             }
                             //too tall, shrink height
@@ -368,10 +366,10 @@
                                 //end higher than start
                                 if (_coords.end.y < _coords.start.y) {
                                     //we're ending on the top, so alter top
-                                    selectTemp.top = selectTemp.bottom - (curWidth / options.aspectRatio);
+                                    selectTemp.top = selectTemp.bottom - (curWidth / $scope.aspectRatio);
                                 } else { //start same or higher than end
                                     //we're ending on the bottom, so alter bottom
-                                    selectTemp.bottom = selectTemp.top + (curWidth / options.aspectRatio);
+                                    selectTemp.bottom = selectTemp.top + (curWidth / $scope.aspectRatio);
                                 }
                             }
                         }
@@ -559,14 +557,10 @@
                         ctrl.show.selection = false;
                     });
 
-                    $timeout(function() {
-                        options = $scope.options;
+                    $timeout(init);
 
-                        init();
-                    });
-                }
+                }]
             };
         }
     ]);
-
 })();

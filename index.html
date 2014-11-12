@@ -10,13 +10,13 @@
 
 <body ng-controller="ExampleCtrl as ctrl">
 
-    <div hj-cropify hj-cropify-options="{aspectRatio: 2}" coords="ctrl.coords">
+    <hj-cropify coords="ctrl.coords" aspect-ratio="2">
 
         <div class="padding"></div>
 
         <img ng-src="example/test.jpg">
 
-    </div>
+    </hj-cropify>
 
     <ul class="controls">
         <li ng-click="ctrl.coords = {}">Reset</li>
