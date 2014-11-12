@@ -454,7 +454,7 @@
                         coords = coords || {};
 
                         var _rect = container[0].getBoundingClientRect(), //gives correct height & width sometimes negative/wrong left/top/right/bottom!
-                            el = $element[0].parentElement,
+                            el = $element[0].parentElement === $document[0].body ? $element[0] : $element[0].parentElement,
                             _x = 0, _y = 0;
 
                         while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop) && !isNaN(el.scrollLeft) && !isNaN(el.scrollTop)) {

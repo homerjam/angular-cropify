@@ -3,6 +3,8 @@ angular.module('ExampleApp', ['hj.cropify']);
 var ExampleCtrl = function($scope) {
     var ctrl = this;
 
+    ctrl.aspectRatio = 2;
+
     ctrl.coords = {
         "left": 0.29,
         "top": 0.398,
