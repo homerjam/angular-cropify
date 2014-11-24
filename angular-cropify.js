@@ -11,9 +11,20 @@
                     aspectRatio: '=',
                     options: '&'
                 },
-                template: function() {
+                template: function($element, $attrs) {
+                    var containerStyle;
+
+                    switch ($attrs.containerStyle || 'block') {
+                        case 'block':
+                            containerStyle = 'display: block';
+                            break;
+                        case 'inline':
+                            containerStyle = 'display: inline-block';
+                            break;
+                    }
+
                     var html = '<div class="hj-cropify" style="position: relative; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">' +
-                        '<div class="hj-cropify-container" style="display: inline-block; width: 100%;" ng-transclude></div>' +
+                        '<div class="hj-cropify-container" style="' + containerStyle + '" ng-transclude></div>' +
                         '<div class="hj-cropify-selection" ng-show="ctrl.show.selection">' +
                         '<div class="hj-cropify-crop" ng-style="ctrl.getStyleCrop()"></div>' +
                         '<div class="hj-cropify-shade" ng-style="ctrl.getStyleLeft()"></div>' +
