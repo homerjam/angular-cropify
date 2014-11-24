@@ -10,21 +10,27 @@
 
 <body ng-controller="ExampleCtrl as ctrl">
 
-    <hj-cropify coords="ctrl.coords" aspect-ratio="ctrl.aspectRatio">
+    <div class="spacer"></div>
 
-        <div class="padding"></div>
+    <div class="wrapper">
 
-        <img ng-src="example/test.jpg">
+        <hj-cropify coords="ctrl.coords" aspect-ratio="ctrl.aspectRatio">
 
-    </hj-cropify>
+            <div class="padding"></div>
 
-    <ul class="controls">
-        <li><button ng-click="ctrl.coords = {}">Reset</button></li>
-        <li><button ng-click="ctrl.setCrop()">Set Crop</button></li>
-        <li>Aspect Ratio: <input type="number" ng-model="ctrl.aspectRatio" min="0"></li>
-    </ul>
+            <img ng-src="example/test.jpg">
 
-    <pre>{{ctrl.coords}}</pre>
+        </hj-cropify>
+
+        <ul class="controls">
+            <li><button ng-click="ctrl.coords = {}">Reset</button></li>
+            <li><button ng-click="ctrl.setCrop()">Set Crop</button></li>
+            <li>Aspect Ratio: <input type="number" ng-model="ctrl.aspectRatio" min="0"></li>
+        </ul>
+
+        <pre>{{ctrl.coords}}</pre>
+
+    </div>
 
     <script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
     <script type="text/javascript" src="angular-cropify.js"></script>

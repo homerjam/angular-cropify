@@ -451,10 +451,15 @@
                     };
 
                     var findPos = function(obj) {
-                        var obj2 = obj;
+                        var obj2 = obj,
+                            x = 0,
+                            y = 0,
+                            style = window.getComputedStyle(obj);
 
-                        var y = 0,
-                            x = 0;
+                        if (style.position === 'fixed') {
+                            x += parseInt(style.left, 10);
+                            y += parseInt(style.top, 10);
+                        }
 
                         if (document.getElementById || document.all) {
                             while (obj.offsetParent) {
