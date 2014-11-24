@@ -13,7 +13,7 @@
                 },
                 template: function() {
                     var html = '<div class="hj-cropify" style="position: relative; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">' +
-                        '<div class="hj-cropify-container" style="display: inline-block;" ng-transclude></div>' +
+                        '<div class="hj-cropify-container" style="display: inline-block; width: 100%;" ng-transclude></div>' +
                         '<div class="hj-cropify-selection" ng-show="ctrl.show.selection">' +
                         '<div class="hj-cropify-crop" ng-style="ctrl.getStyleCrop()"></div>' +
                         '<div class="hj-cropify-shade" ng-style="ctrl.getStyleLeft()"></div>' +
@@ -450,25 +450,53 @@
                         }
                     };
 
+                    var findPos = function(obj) {
+                        var obj2 = obj;
+
+                        var y = 0,
+                            x = 0;
+
+                        if (document.getElementById || document.all) {
+                            while (obj.offsetParent) {
+                                x += obj.offsetLeft - obj.scrollLeft;
+                                y += obj.offsetTop - obj.scrollTop;
+
+                                obj = obj.offsetParent;
+                                obj2 = obj2.parentNode;
+
+                                while (obj2 != obj) {
+                                    x -= obj2.scrollLeft;
+                                    y -= obj2.scrollTop;
+                                    obj2 = obj2.parentNode;
+                                }
+                            }
+
+                        } else if (document.layers) {
+                            y += obj.y;
+                            x += obj.x;
+                        }
+
+                        return [x, y];
+                    };
+
                     var setCoords = function(coords) {
                         coords = coords || {};
 
                         var _rect = container[0].getBoundingClientRect(), //gives correct height & width sometimes negative/wrong left/top/right/bottom!
+
                             el = $element[0].parentElement === $document[0].body ? $element[0] : $element[0].parentElement,
-                            _x = 0, _y = 0;
 
-                        while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop) && !isNaN(el.scrollLeft) && !isNaN(el.scrollTop)) {
-                            _x += el.offsetLeft + el.scrollLeft;
-                            _y += el.offsetTop + el.scrollTop;
-                            el = el.parentElement;
-                        }
+                            pos = findPos(el),
 
-                        var rect = {
-                            left: _x,
-                            right: _x + _rect.width,
-                            top: _y,
-                            bottom: _y + _rect.height
-                        };
+                            _x = pos[0],
+                            _y = pos[1],
+
+                            rect = {
+                                left: _x,
+                                right: _x + _rect.width,
+                                top: _y,
+                                bottom: _y + _rect.height
+                            };
 
                         _coords.el = {
                             left: rect.left,
