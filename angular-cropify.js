@@ -229,6 +229,12 @@
                         scopeApply();
                     });
 
+                    angular.element($window).on('scroll', function() {
+                        setCoords();
+
+                        setSelect();
+                    });
+
                     $scope.$watch('coords', function(n) {
                         if (n === undefined) {
                             return;
@@ -457,8 +463,8 @@
                             style = window.getComputedStyle(obj);
 
                         if (style.position === 'fixed') {
-                            x += parseInt(style.left, 10);
-                            y += parseInt(style.top, 10);
+                            x += parseInt(style.left, 10) + $document[0].body.scrollLeft;
+                            y += parseInt(style.top, 10) + $document[0].body.scrollTop;
                         }
 
                         if (document.getElementById || document.all) {
