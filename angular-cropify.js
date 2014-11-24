@@ -470,32 +470,27 @@
                     var findPos = function(obj) {
                         var obj2 = obj,
                             x = 0,
-                            y = 0,
-                            style = window.getComputedStyle(obj);
+                            y = 0;
 
-                        if (style.position === 'fixed') {
-                            x += parseInt(style.left, 10) + $document[0].body.scrollLeft;
-                            y += parseInt(style.top, 10) + $document[0].body.scrollTop;
-                        }
+                        while ((obj && obj.offsetParent) || (obj && obj.parentNode)) {
+                            var style = $window.getComputedStyle(obj);
 
-                        if (document.getElementById || document.all) {
-                            while (obj.offsetParent) {
+                            if (style.position === 'fixed') {
+                                x += parseInt(style.left, 10) + $document[0].body.scrollLeft;
+                                y += parseInt(style.top, 10) + $document[0].body.scrollTop;
+                            } else {
                                 x += obj.offsetLeft - obj.scrollLeft;
                                 y += obj.offsetTop - obj.scrollTop;
-
-                                obj = obj.offsetParent;
-                                obj2 = obj2.parentNode;
-
-                                while (obj2 != obj) {
-                                    x -= obj2.scrollLeft;
-                                    y -= obj2.scrollTop;
-                                    obj2 = obj2.parentNode;
-                                }
                             }
 
-                        } else if (document.layers) {
-                            y += obj.y;
-                            x += obj.x;
+                            obj = obj.offsetParent;
+                            obj2 = obj2.parentNode;
+
+                            while (obj2 != obj && style.position !== 'fixed') {
+                                x -= !isNaN(obj2.scrollLeft) ? obj2.scrollLeft : 0;
+                                y -= !isNaN(obj2.scrollTop) ? obj2.scrollTop : 0;
+                                obj2 = obj2.parentNode;
+                            }
                         }
 
                         return [x, y];
