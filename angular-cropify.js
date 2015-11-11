@@ -295,7 +295,7 @@
 
                     var cropStart = function(e) {
                         var xx = e.pageX;
-                        var yy = e.pageY;
+                        var yy = e.pageY - $window.scrollY;
 
                         //only start if within a certain distance of the element itself (i.e. don't reset if doing something else but DO want a little buffer to allow for selecting from an edge and getting it all)
                         if (xx >= _coords.el.left - options.selectBuffer && xx <= _coords.el.right + options.selectBuffer && yy >= _coords.el.top - options.selectBuffer && yy <= _coords.el.bottom + options.selectBuffer) {
@@ -408,7 +408,7 @@
                         ctrl.state.dragging = true;
 
                         ctrl.offsets.crop.left = e.offsetX;
-                        ctrl.offsets.crop.top = e.offsetY;
+                        ctrl.offsets.crop.top = e.offsetY + $window.scrollY; 
                     };
 
                     var dragMove = function(e) {
