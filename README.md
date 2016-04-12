@@ -1,6 +1,6 @@
 # angular-cropify
 
-Angular directive to crop/select an area of an element such as an image. Possible lightweight Jcrop alternative.
+Angular directive to crop/select an area of an element.
 
 
 ## Demo

@@ -1,9 +1,9 @@
 {
     "name": "angular-cropify",
-    "description": "Angular directive to crop/select an area of an element such as an image. Possible lightweight Jcrop alternative.",
-    "version": "0.0.11",
+    "description": "Angular directive to crop/select an area of an element.",
+    "version": "0.0.12",
     "main": "angular-cropify.js",
     "dependencies": {
-        "angular": "~1.2.26"
+        "angular": ">=1.2.0"
     }
 }
