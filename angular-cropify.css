@@ -1,0 +1,24 @@
+.hj-cropify {
+  position: relative;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; }
+  .hj-cropify__container--block {
+    display: block; }
+  .hj-cropify__container--inline {
+    display: inline-block; }
+  .hj-cropify__shade {
+    position: absolute;
+    z-index: 999;
+    pointer-events: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    background-color: rgba(0, 0, 0, 0.5); }
+  .hj-cropify__crop {
+    position: absolute;
+    z-index: 999;
+    cursor: move;
+    border: 1px dashed rgba(255, 255, 255, 0.5); }

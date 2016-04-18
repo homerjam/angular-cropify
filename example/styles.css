@@ -18,6 +18,8 @@ body {
 }
 
 .wrapper {
+	/*position: absolute;
+	top: 50%;*/
 	position: fixed;
 	top: 5%;
 	left: 25%;

@@ -1,6 +1,6 @@
 {
   "name": "angular-cropify",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "description": "Angular directive to crop/select an area of an element.",
   "main": "index.js",
   "repository": {
@@ -8,12 +8,13 @@
     "url": "https://github.com/homerjam/angular-cropify"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "styles": "node-sass angular-cropify.scss angular-cropify.css; postcss --use autoprefixer -o angular-cropify.css angular-cropify.css"
   },
   "author": "Homerjam <jameshomer85@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "angular": ">=1.2.0"
+    "angular": ">=1.5.0"
   },
   "devDependencies": {
   }
