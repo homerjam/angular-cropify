@@ -1,6 +1,7 @@
 .hj-cropify {
   position: relative;
   user-select: none;
+
   &__container {
     &--block {
       display: block;
@@ -21,5 +22,6 @@
     z-index: 999;
     cursor: move;
     border: 1px dashed rgba(255, 255, 255, 0.5);
+    box-sizing: border-box;
   }
 }

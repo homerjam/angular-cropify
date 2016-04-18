@@ -61,7 +61,7 @@
             top: 0,
             bottom: 0,
             height: 0,
-            width: 0
+            width: 0,
           };
         } else {
           coords = ctrl.coords;
@@ -70,18 +70,18 @@
         var _coords = {
           start: {
             x: 0,
-            y: 0
+            y: 0,
           },
           end: {
             x: 0,
-            y: 0
+            y: 0,
           },
           // raw coords - without elOffsets subtracted
           el: {
             left: 0,
             right: 0,
             top: 0,
-            bottom: 0
+            bottom: 0,
           },
           // raw coords - without elOffsets subtracted
           select: {
@@ -90,18 +90,18 @@
             top: 0,
             bottom: 0,
             width: 0,
-            height: 0
+            height: 0,
           }
         };
 
         var elOffsets = {
           top: 0,
-          left: 0
+          left: 0,
         };
 
         var cropOffsets = {
           top: 0,
-          left: 0
+          left: 0,
         };
 
         var elCoords = {
@@ -110,7 +110,7 @@
           top: 0,
           bottom: 0,
           height: 0,
-          width: 0
+          width: 0,
         };
 
         var updateUi = function () {
@@ -130,35 +130,35 @@
           }
 
           shadeLeft.css({
-            top: _coords.el.top - elOffsets.top + 'px',
-            left: _coords.el.left - elOffsets.left + 'px',
-            height: _coords.el.bottom - _coords.el.top + 'px',
-            width: _coords.select.left - _coords.el.left + 'px'
+            top: 0,
+            left: 0,
+            width: _coords.select.left - _coords.el.left + 'px',
+            height: '100%',
           });
           shadeRight.css({
-            top: _coords.el.top - elOffsets.top + 'px',
-            left: _coords.select.right - elOffsets.left + 'px',
-            height: _coords.el.bottom - _coords.el.top + 'px',
-            width: _coords.el.right - _coords.select.right + 'px'
+            top: 0,
+            right: 0,
+            width: _coords.el.right - _coords.select.right + 'px',
+            height: '100%',
           });
           shadeTop.css({
-            top: _coords.el.top - elOffsets.top + 'px',
-            left: _coords.select.left - elOffsets.left + 'px',
-            height: _coords.select.top - _coords.el.top + 'px',
+            top: 0,
+            left: _coords.select.left - _coords.el.left + 'px',
             width: _coords.select.right - _coords.select.left + 'px',
+            height: _coords.select.top - _coords.el.top + 'px',
           });
           shadeBottom.css({
-            top: _coords.select.bottom - elOffsets.top + 'px',
-            left: _coords.select.left - elOffsets.left + 'px',
+            bottom: 0,
+            left: _coords.select.left - _coords.el.left + 'px',
+            width: _coords.select.right - _coords.select.left + 'px',
             height: _coords.el.bottom - _coords.select.bottom + 'px',
-            width: _coords.select.right - _coords.select.left + 'px'
           });
 
           crop.css({
             top: elCoords.height * coords.top + 'px',
             left: elCoords.width * coords.left + 'px',
             width: elCoords.width * coords.width + 'px',
-            height: elCoords.height * coords.height + 'px'
+            height: elCoords.height * coords.height + 'px',
           });
 
           if (showSelection) {
@@ -336,7 +336,7 @@
             top: selectTemp.top,
             left: selectTemp.left,
             bottom: selectTemp.bottom,
-            right: selectTemp.right
+            right: selectTemp.right,
           };
 
           _coords.select.width = selectTemp.right - selectTemp.left;
@@ -403,28 +403,28 @@
         var setCoords = function (newCoords) {
           newCoords = newCoords || coords;
 
-          var _rect = container[0].getBoundingClientRect(); // Gives correct height & width sometimes negative/wrong left/top/right/bottom!
+          var containerRect = container[0].getBoundingClientRect(); // Gives correct height & width sometimes negative/wrong left/top/right/bottom!
           var el = $element[0].parentElement === $document[0].body ? $element[0] : $element[0].parentElement;
           var pos = findPos(el);
           var x = pos[0];
           var y = pos[1];
           var rect = {
             left: x,
-            right: x + _rect.width,
+            right: x + containerRect.width,
             top: y,
-            bottom: y + _rect.height
+            bottom: y + containerRect.height
           };
 
           _coords.el = {
             left: rect.left,
             right: rect.right,
             top: rect.top,
-            bottom: rect.bottom
+            bottom: rect.bottom,
           };
 
           elOffsets = {
             top: rect.top,
-            left: rect.left
+            left: rect.left,
           };
 
           elCoords = {
@@ -433,7 +433,7 @@
             right: rect.right - rect.left,
             bottom: rect.bottom - rect.top,
             height: rect.bottom - rect.top,
-            width: rect.right - rect.left
+            width: rect.right - rect.left,
           };
 
           if (Object.keys(newCoords).length === 0) {
@@ -453,7 +453,7 @@
               top: (elCoords.height * newCoords.top) + elOffsets.top,
               bottom: (elCoords.height * newCoords.bottom) + elOffsets.top,
               width: elCoords.width * newCoords.width,
-              height: elCoords.height * newCoords.height
+              height: elCoords.height * newCoords.height,
             };
           }
         };
@@ -508,7 +508,7 @@
 
           coords = newCoords;
 
-          init();
+          $timeout(init);
         });
 
         $scope.$on('hjCropify:init', function (event, params) {
@@ -556,8 +556,6 @@
 
           updateUi();
         });
-
-        $timeout(init);
 
       }]
     };
