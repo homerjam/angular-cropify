@@ -1,6 +1,6 @@
 {
   "name": "angular-cropify",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Angular directive to crop/select an area of an element.",
   "main": "index.js",
   "repository": {
@@ -16,6 +16,5 @@
   "dependencies": {
     "angular": ">=1.5.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
