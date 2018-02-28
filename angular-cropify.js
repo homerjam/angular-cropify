@@ -477,7 +477,7 @@
           updateUi();
         });
 
-        $document.on('mousedown touchstart', function (event) {
+        container.on('mousedown touchstart', function (event) {
           setCoords();
 
           cropStart(event);
